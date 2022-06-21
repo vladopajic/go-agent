@@ -69,11 +69,6 @@ func (a *agentImpl) Stop() {
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"id":     a.options.ID,
-		"worker": workerName(a.worker),
-	}).Debug("stopping agent")
-
 	a.workEndedSigC = make(chan struct{})
 	a.ctx.SignalEnd()
 	<-a.workEndedSigC
@@ -87,17 +82,17 @@ func (a *agentImpl) Start() {
 
 	a.workerRunning = true
 
-	log.WithFields(log.Fields{
-		"id":     a.options.ID,
-		"worker": workerName(a.worker),
-	}).Debug("starting agent")
-
 	go a.doWork()
 }
 
 // doWork executes `Worker` of this `Agent` until
 // `Agent` or `Worker` has signaled to stop.
 func (a *agentImpl) doWork() {
+	log.WithFields(log.Fields{
+		"id":     a.options.ID,
+		"worker": workerName(a.worker),
+	}).Debug("starting agent")
+
 	a.options.OnStartFunc()
 	defer a.options.OnStopFunc()
 
@@ -109,6 +104,11 @@ func (a *agentImpl) doWork() {
 	if c := a.workEndedSigC; c != nil {
 		c <- struct{}{}
 	}
+
+	log.WithFields(log.Fields{
+		"id":     a.options.ID,
+		"worker": workerName(a.worker),
+	}).Debug("stopping agent")
 }
 
 func StartAll(agents ...Agent) {

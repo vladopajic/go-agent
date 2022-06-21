@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewAgent(t *testing.T) {
+func Test_NewAgent(t *testing.T) {
 	t.Parallel()
 
 	const count = 20
@@ -26,7 +26,7 @@ func TestNewAgent(t *testing.T) {
 	}
 }
 
-func TestNewAgent_StartStop(t *testing.T) {
+func Test_NewAgent_StartStop(t *testing.T) {
 	t.Parallel()
 
 	const count = 20
@@ -45,7 +45,7 @@ func TestNewAgent_StartStop(t *testing.T) {
 	}
 }
 
-func TestNewAgent_StopAfterNoWork(t *testing.T) {
+func Test_NewAgent_StopAfterNoWork(t *testing.T) {
 	t.Parallel()
 
 	const count = 20
@@ -65,7 +65,7 @@ func TestNewAgent_StopAfterNoWork(t *testing.T) {
 	go close(w.doWorkC)
 }
 
-func TestNewAgent_OptOnStartStop(t *testing.T) {
+func Test_NewAgent_OptOnStartStop(t *testing.T) {
 	t.Parallel()
 
 	onStartC := make(chan struct{}, 1)

@@ -8,39 +8,53 @@ type Ticker interface {
 }
 
 func NewTicker(tickInterval time.Duration) Ticker {
-	return &tickerImpl{
+	w := &tickerWorker{
 		tickInterval: tickInterval,
 		out:          make(chan time.Time, 1),
+	}
+
+	return &tickerImpl{
+		Agent:  NewWithWorker(w, OptOnStart(w.onStart), OptOnStop(w.onStop)),
+		worker: w,
 	}
 }
 
 type tickerImpl struct {
+	Agent
+	worker *tickerWorker
+}
+
+func (t *tickerImpl) C() <-chan time.Time {
+	return t.worker.out
+}
+
+type tickerWorker struct {
 	tickInterval time.Duration
 	out          chan time.Time
 	ticker       *time.Ticker
 }
 
-func (a *tickerImpl) Start() {
-	a.ticker = time.NewTicker(a.tickInterval)
-	go a.doWork()
+func (w *tickerWorker) onStart() {
+	w.ticker = time.NewTicker(w.tickInterval)
 }
 
-func (a *tickerImpl) doWork() {
-	for {
-		t, ok := <-a.ticker.C
+func (w *tickerWorker) onStop() {
+	w.ticker.Stop()
+	close(w.out)
+}
+
+func (w *tickerWorker) DoWork(c Context) (workEnded bool) {
+	select {
+	case t, ok := <-w.ticker.C:
 		if !ok {
-			close(a.out)
-			return
+			return true
 		}
-		a.out <- t
+
+		w.out <- t
+
+		return false
+
+	case <-c.EndWorkC():
+		return true
 	}
-}
-
-func (a *tickerImpl) Stop() {
-	a.ticker.Stop()
-	close(a.out)
-}
-
-func (a *tickerImpl) C() <-chan time.Time {
-	return a.out
 }
