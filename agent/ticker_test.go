@@ -29,6 +29,7 @@ func Test_Ticker(t *testing.T) {
 	}()
 
 	ticks := 0
+
 	for tickTime := range ticker.C() {
 		assert.NotEmpty(t, tickTime)
 		ticks++
