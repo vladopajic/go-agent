@@ -22,7 +22,7 @@ linters:
     - dogsled
     - dupl
     - durationcheck
-    #- errchkjson
+    - errchkjson
     - errname
     - errorlint
     - exhaustive
@@ -31,7 +31,7 @@ linters:
     - forbidigo
     - forcetypeassert
     - funlen
-    - gci
+    # - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit

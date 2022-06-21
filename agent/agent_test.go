@@ -3,9 +3,9 @@ package agent_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	. "github.com/vladopajic/go-agent/agent"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewAgent(t *testing.T) {
