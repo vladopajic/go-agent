@@ -93,20 +93,20 @@ type worker struct {
 	doWorkC       chan chan int
 }
 
-func (w *worker) DoWork(c Context) bool {
+func (w *worker) DoWork(c Context) WorkerStatus {
 	select {
 	case p, ok := <-w.doWorkC:
 		if !ok {
-			return true
+			return WorkerEnded
 		}
 
 		p <- w.workIteration
 		w.workIteration++
 
-		return false
+		return WorkerContinue
 
 	case <-c.EndWorkC():
-		return true
+		return WorkerEnded
 	}
 }
 

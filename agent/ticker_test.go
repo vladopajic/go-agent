@@ -35,5 +35,5 @@ func Test_Ticker(t *testing.T) {
 		ticks++
 	}
 
-	assert.Equal(t, tickCount, ticks)
+	assert.GreaterOrEqual(t, tickCount, ticks)
 }

@@ -36,8 +36,15 @@ func (c *contextImpl) SignalEnd() {
 	c.endWork <- struct{}{}
 }
 
+type WorkerStatus int8
+
+const (
+	WorkerContinue WorkerStatus = 1
+	WorkerEnded    WorkerStatus = 2
+)
+
 type Worker interface {
-	DoWork(c Context) (workEnded bool)
+	DoWork(c Context) WorkerStatus
 }
 
 func NewWithWorker(w Worker, opt ...Option) Agent {
@@ -88,16 +95,18 @@ func (a *agentImpl) Start() {
 // doWork executes `Worker` of this `Agent` until
 // `Agent` or `Worker` has signaled to stop.
 func (a *agentImpl) doWork() {
-	log.WithFields(log.Fields{
+	log := log.WithFields(log.Fields{
 		"id":     a.options.ID,
 		"worker": workerName(a.worker),
-	}).Debug("starting agent")
+	})
+
+	log.Debug("starting agent")
 
 	a.options.OnStartFunc()
 	defer a.options.OnStopFunc()
 
-	for workEnded := false; !workEnded; {
-		workEnded = a.worker.DoWork(a.ctx)
+	for wStatus := WorkerContinue; wStatus == WorkerContinue; {
+		wStatus = a.worker.DoWork(a.ctx)
 	}
 
 	a.workerRunning = false
@@ -105,10 +114,7 @@ func (a *agentImpl) doWork() {
 		c <- struct{}{}
 	}
 
-	log.WithFields(log.Fields{
-		"id":     a.options.ID,
-		"worker": workerName(a.worker),
-	}).Debug("stopping agent")
+	log.Debug("stopping agent")
 }
 
 func StartAll(agents ...Agent) {

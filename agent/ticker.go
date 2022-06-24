@@ -43,18 +43,18 @@ func (w *tickerWorker) onStop() {
 	close(w.out)
 }
 
-func (w *tickerWorker) DoWork(c Context) (workEnded bool) {
+func (w *tickerWorker) DoWork(c Context) WorkerStatus {
 	select {
 	case t, ok := <-w.ticker.C:
 		if !ok {
-			return true
+			return WorkerEnded
 		}
 
 		w.out <- t
 
-		return false
+		return WorkerContinue
 
 	case <-c.EndWorkC():
-		return true
+		return WorkerEnded
 	}
 }
